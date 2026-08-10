@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FCUpgrade.API/FCUpgrade.API.csproj" />
+    <Project Path="src/FCUpgrade.Application/FCUpgrade.Application.csproj" />
+    <Project Path="src/FCUpgrade.Contracts/FCUpgrade.Contracts.csproj" />
+    <Project Path="src/FCUpgrade.Domain/FCUpgrade.Domain.csproj" />
+    <Project Path="src/FCUpgrade.Infrastructure/FCUpgrade.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FCUpgrade.IntegrationTests/FCUpgrade.IntegrationTests.csproj" />
+    <Project Path="tests/FCUpgrade.UnitTests/FCUpgrade.UnitTests.csproj" />
+  </Folder>
+</Solution>

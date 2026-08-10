@@ -1,0 +1,8 @@
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\bin\Release\net10.0\.msCoverageSourceRootsMapping_FCUpgrade.IntegrationTests
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\bin\Release\net10.0\CoverletSourceRootsMapping_FCUpgrade.IntegrationTests
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\obj\Release\net10.0\FCUpgrade.IntegrationTests.csproj.AssemblyReference.cache
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\obj\Release\net10.0\MvcTestingAppManifest.json
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\obj\Release\net10.0\FCUpgrade.IntegrationTests.GeneratedMSBuildEditorConfig.editorconfig
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\obj\Release\net10.0\FCUpgrade.IntegrationTests.AssemblyInfoInputs.cache
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\obj\Release\net10.0\FCUpgrade.IntegrationTests.AssemblyInfo.cs
+d:\Projects\evofco4\tests\FCUpgrade.IntegrationTests\obj\Release\net10.0\FCUpgrade.IntegrationTests.csproj.CoreCompileInputs.cache

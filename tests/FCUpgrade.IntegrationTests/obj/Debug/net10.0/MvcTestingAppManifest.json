@@ -1,0 +1,7 @@
+{
+  "FCUpgrade.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\evofco4\\src\\FCUpgrade.API",
+  "FCUpgrade.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\evofco4\\src\\FCUpgrade.Application",
+  "FCUpgrade.Contracts, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\evofco4\\src\\FCUpgrade.Contracts",
+  "FCUpgrade.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\evofco4\\src\\FCUpgrade.Domain",
+  "FCUpgrade.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null": "d:\\Projects\\evofco4\\src\\FCUpgrade.Infrastructure"
+}

@@ -1,0 +1,6 @@
+@FCUpgrade.API_HostAddress = http://localhost:5162
+
+GET {{FCUpgrade.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

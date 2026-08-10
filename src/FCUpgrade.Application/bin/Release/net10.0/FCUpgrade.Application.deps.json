@@ -1,0 +1,53 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "FCUpgrade.Application/1.0.0": {
+        "dependencies": {
+          "FCUpgrade.Contracts": "1.0.0",
+          "FCUpgrade.Domain": "1.0.0"
+        },
+        "runtime": {
+          "FCUpgrade.Application.dll": {}
+        }
+      },
+      "FCUpgrade.Contracts/1.0.0": {
+        "runtime": {
+          "FCUpgrade.Contracts.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "FCUpgrade.Domain/1.0.0": {
+        "runtime": {
+          "FCUpgrade.Domain.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FCUpgrade.Application/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FCUpgrade.Contracts/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FCUpgrade.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

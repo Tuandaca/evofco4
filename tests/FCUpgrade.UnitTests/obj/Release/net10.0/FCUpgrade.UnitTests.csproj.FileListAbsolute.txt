@@ -1,0 +1,7 @@
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\bin\Release\net10.0\.msCoverageSourceRootsMapping_FCUpgrade.UnitTests
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\bin\Release\net10.0\CoverletSourceRootsMapping_FCUpgrade.UnitTests
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\obj\Release\net10.0\FCUpgrade.UnitTests.csproj.AssemblyReference.cache
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\obj\Release\net10.0\FCUpgrade.UnitTests.GeneratedMSBuildEditorConfig.editorconfig
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\obj\Release\net10.0\FCUpgrade.UnitTests.AssemblyInfoInputs.cache
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\obj\Release\net10.0\FCUpgrade.UnitTests.AssemblyInfo.cs
+d:\Projects\evofco4\tests\FCUpgrade.UnitTests\obj\Release\net10.0\FCUpgrade.UnitTests.csproj.CoreCompileInputs.cache
