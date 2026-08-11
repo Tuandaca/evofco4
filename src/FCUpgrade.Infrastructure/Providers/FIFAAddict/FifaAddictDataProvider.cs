@@ -74,12 +74,12 @@ public class FifaAddictDataProvider
         // Actually, FIFAaddict Uid (e.g. 'awoqywkd') is unique per PlayerSeason. 
         // We will store the base player name as the Player.
         
-        var player = await _dbContext.Players.FirstOrDefaultAsync(p => p.SourceId == basePlayerId, cancellationToken);
+        var player = await _dbContext.Players.FirstOrDefaultAsync(p => p.Name == detailDto.Name, cancellationToken);
         if (player == null)
         {
             player = new Player
             {
-                SourceId = basePlayerId,
+                SourceId = basePlayerId, // We use the very first discovered season's uid as the base SourceId for reference
                 Name = detailDto.Name,
                 NameShort = detailDto.NameShort,
                 SourceUrl = detailUrl,

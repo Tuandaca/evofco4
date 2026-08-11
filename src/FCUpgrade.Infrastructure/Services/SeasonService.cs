@@ -27,7 +27,10 @@ public class SeasonService : ISeasonService
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = $"%{request.Search}%";
-            query = query.Where(s => EF.Functions.ILike(s.Name, search) || EF.Functions.ILike(s.Code, search) || EF.Functions.ILike(s.SeasonId, search));
+            if (_dbContext.Database.IsNpgsql())
+                query = query.Where(s => EF.Functions.ILike(s.Name, search) || EF.Functions.ILike(s.Code, search) || EF.Functions.ILike(s.SeasonId, search));
+            else
+                query = query.Where(s => EF.Functions.Like(s.Name, search) || EF.Functions.Like(s.Code, search) || EF.Functions.Like(s.SeasonId, search));
         }
 
         query = request.SortBy?.ToLower() switch

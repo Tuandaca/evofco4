@@ -67,6 +67,26 @@ temp/
 *.tmp
 *.temp
 
+# ===================================
+# .NET / C# specific
+# ===================================
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.db
+*.db-shm
+*.db-wal
+
+# Scratch/investigation scripts (not production code)
+src/FCUpgrade.API/test_*.js
+src/FCUpgrade.API/test_*.py
+src/FCUpgrade.API/fo4db_page1.html
+src/FCUpgrade.API/package.json
+src/FCUpgrade.API/package-lock.json
+src/FCUpgrade.API/nuxt.js
+
 .agent/*
 .agent
 

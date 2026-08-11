@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FC Upgrade Intelligence — Design System
+   Color palette: Deep Navy + Electric Blue (Football Analytics)
+   ============================================================ */
+
+:root {
+  /* Base */
+  --background: hsl(222, 47%, 6%);
+  --background-subtle: hsl(222, 40%, 9%);
+  --foreground: hsl(210, 40%, 96%);
+  --foreground-muted: hsl(215, 20%, 65%);
+
+  /* Card / Surface */
+  --card: hsl(222, 44%, 9%);
+  --card-hover: hsl(222, 40%, 12%);
+  --card-foreground: hsl(210, 40%, 96%);
+
+  /* Borders */
+  --border: hsl(217, 32%, 17%);
+  --border-subtle: hsl(217, 32%, 13%);
+
+  /* Muted */
+  --muted: hsl(217, 32%, 13%);
+  --muted-foreground: hsl(215, 20%, 55%);
+
+  /* Primary — Electric Blue */
+  --primary: hsl(213, 94%, 60%);
+  --primary-foreground: hsl(222, 47%, 6%);
+  --primary-hover: hsl(213, 94%, 65%);
+
+  /* Secondary */
+  --secondary: hsl(217, 32%, 17%);
+  --secondary-foreground: hsl(210, 40%, 96%);
+
+  /* Accent — Amber (for OVR highlights) */
+  --accent: hsl(38, 92%, 55%);
+  --accent-foreground: hsl(222, 47%, 6%);
+
+  /* Destructive */
+  --destructive: hsl(0, 86%, 60%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+
+  /* Emerald (for success/positive states) */
+  --success: hsl(160, 84%, 39%);
+  --success-foreground: hsl(210, 40%, 98%);
+
+  /* Ring (focus) */
+  --ring: hsl(213, 94%, 60%);
+
+  /* Radius */
+  --radius: 0.5rem;
+  --radius-sm: 0.25rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+/* Light mode override — still football-premium but brighter */
+.light {
+  --background: hsl(210, 40%, 98%);
+  --background-subtle: hsl(210, 36%, 96%);
+  --foreground: hsl(222, 47%, 11%);
+  --foreground-muted: hsl(215, 16%, 47%);
+
+  --card: hsl(0, 0%, 100%);
+  --card-hover: hsl(210, 40%, 97%);
+  --card-foreground: hsl(222, 47%, 11%);
+
+  --border: hsl(214, 32%, 91%);
+  --border-subtle: hsl(214, 32%, 95%);
+
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(215, 16%, 47%);
+
+  --primary: hsl(213, 94%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --primary-hover: hsl(213, 94%, 45%);
+
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(222, 47%, 11%);
+
+  --accent: hsl(38, 92%, 50%);
+  --accent-foreground: hsl(222, 47%, 6%);
+
+  --destructive: hsl(0, 86%, 55%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+
+  --success: hsl(160, 84%, 35%);
+  --success-foreground: hsl(210, 40%, 98%);
+
+  --ring: hsl(213, 94%, 50%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-background-subtle: var(--background-subtle);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-inter);
+  --radius: var(--radius);
+}
+
+/* ── Base Styles ────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Focus Visible ──────────────────────────────────────────── */
+
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* ── Selection ──────────────────────────────────────────────── */
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  color: var(--foreground);
+}
+
+/* ── Smooth animations ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .transition-smooth {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* ── OVR Badge Colors ───────────────────────────────────────── */
+
+.ovr-legendary {
+  color: hsl(38, 92%, 60%);
+}
+
+.ovr-elite {
+  color: hsl(270, 80%, 70%);
+}
+
+.ovr-high {
+  color: hsl(213, 94%, 65%);
+}
+
+.ovr-good {
+  color: hsl(142, 71%, 55%);
+}
+
+.ovr-decent {
+  color: hsl(160, 84%, 50%);
+}
+
+.ovr-normal {
+  color: var(--foreground-muted);
+}

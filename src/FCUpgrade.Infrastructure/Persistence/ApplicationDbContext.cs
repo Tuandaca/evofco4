@@ -36,7 +36,7 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.SourceId).IsUnique();
-            entity.HasIndex(e => new { e.PlayerId, e.SeasonId }).IsUnique();
+            entity.HasIndex(e => new { e.PlayerId, e.SeasonId });
             
             // Performance Indexes for Filtering/Sorting
             entity.HasIndex(e => e.Ovr);

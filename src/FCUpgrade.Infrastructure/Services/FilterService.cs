@@ -40,7 +40,10 @@ public class FilterService : IFilterService
         if (!string.IsNullOrWhiteSpace(search))
         {
             var searchTerm = $"%{search}%";
-            query = query.Where(ps => EF.Functions.ILike(ps.TeamName, searchTerm));
+            if (_dbContext.Database.IsNpgsql())
+                query = query.Where(ps => EF.Functions.ILike(ps.TeamName, searchTerm));
+            else
+                query = query.Where(ps => EF.Functions.Like(ps.TeamName, searchTerm));
         }
 
         return await query
@@ -64,7 +67,10 @@ public class FilterService : IFilterService
         if (!string.IsNullOrWhiteSpace(search))
         {
             var searchTerm = $"%{search}%";
-            query = query.Where(ps => EF.Functions.ILike(ps.NationName, searchTerm));
+            if (_dbContext.Database.IsNpgsql())
+                query = query.Where(ps => EF.Functions.ILike(ps.NationName, searchTerm));
+            else
+                query = query.Where(ps => EF.Functions.Like(ps.NationName, searchTerm));
         }
 
         return await query
@@ -88,7 +94,10 @@ public class FilterService : IFilterService
         if (!string.IsNullOrWhiteSpace(search))
         {
             var searchTerm = $"%{search}%";
-            query = query.Where(ps => EF.Functions.ILike(ps.LeagueName, searchTerm));
+            if (_dbContext.Database.IsNpgsql())
+                query = query.Where(ps => EF.Functions.ILike(ps.LeagueName, searchTerm));
+            else
+                query = query.Where(ps => EF.Functions.Like(ps.LeagueName, searchTerm));
         }
 
         return await query

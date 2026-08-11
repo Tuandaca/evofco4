@@ -24,10 +24,27 @@ public class PlayerService : IPlayerService
     {
         var query = _dbContext.Players.AsNoTracking().AsQueryable();
 
+        bool isPostgres = _dbContext.Database.IsNpgsql();
+
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = $"%{request.Search}%";
-            query = query.Where(p => EF.Functions.ILike(p.Name, search) || EF.Functions.ILike(p.NameShort, search));
+            if (isPostgres)
+                query = query.Where(p => EF.Functions.ILike(p.Name, search) || EF.Functions.ILike(p.NameShort, search));
+            else
+                query = query.Where(p => EF.Functions.Like(p.Name, search) || EF.Functions.Like(p.NameShort, search));
+        }
+
+        // Apply PlayerSeason filters if any
+        if (request.SeasonId.HasValue || !string.IsNullOrWhiteSpace(request.SeasonCode) || !string.IsNullOrWhiteSpace(request.Position) || request.MinOvr.HasValue || request.MaxOvr.HasValue)
+        {
+            query = query.Where(p => p.PlayerSeasons.Any(ps => 
+                (!request.SeasonId.HasValue || ps.SeasonId == request.SeasonId.Value) &&
+                (string.IsNullOrWhiteSpace(request.SeasonCode) || ps.Season.Code.ToLower() == request.SeasonCode.ToLower()) &&
+                (string.IsNullOrWhiteSpace(request.Position) || ps.Pos1.ToLower() == request.Position.ToLower()) &&
+                (!request.MinOvr.HasValue || ps.Ovr >= request.MinOvr.Value) &&
+                (!request.MaxOvr.HasValue || ps.Ovr <= request.MaxOvr.Value)
+            ));
         }
 
         // Apply sorting
@@ -35,7 +52,8 @@ public class PlayerService : IPlayerService
         {
             "name" => request.SortDirection?.ToLower() == "desc" ? query.OrderByDescending(p => p.Name) : query.OrderBy(p => p.Name),
             "updatedat" => request.SortDirection?.ToLower() == "desc" ? query.OrderByDescending(p => p.UpdatedAt) : query.OrderBy(p => p.UpdatedAt),
-            _ => query.OrderBy(p => p.Name) // Default
+            "ovr" => request.SortDirection?.ToLower() == "asc" ? query.OrderBy(p => p.PlayerSeasons.Max(ps => ps.Ovr)) : query.OrderByDescending(p => p.PlayerSeasons.Max(ps => ps.Ovr)),
+            _ => query.OrderByDescending(p => p.PlayerSeasons.Max(ps => ps.Ovr)) // Default
         };
 
         var totalItems = await query.CountAsync(cancellationToken);
@@ -53,7 +71,26 @@ public class PlayerService : IPlayerService
                 SourceId = p.SourceId,
                 Name = p.Name,
                 NameShort = p.NameShort,
-                ImageUrl = $"https://en.fifaaddict.com/fo4db/pid{p.SourceId}.png" // Assuming image format
+                ImageUrl = $"https://s1.fifaaddict.com/fo4/players/{p.SourceId}.png",
+                DefaultSeason = p.PlayerSeasons
+                    .Where(ps => 
+                        (!request.SeasonId.HasValue || ps.SeasonId == request.SeasonId.Value) &&
+                        (string.IsNullOrWhiteSpace(request.SeasonCode) || ps.Season.Code.ToLower() == request.SeasonCode.ToLower()) &&
+                        (string.IsNullOrWhiteSpace(request.Position) || ps.Pos1.ToLower() == request.Position.ToLower()) &&
+                        (!request.MinOvr.HasValue || ps.Ovr >= request.MinOvr.Value) &&
+                        (!request.MaxOvr.HasValue || ps.Ovr <= request.MaxOvr.Value)
+                    )
+                    .OrderByDescending(ps => ps.Ovr)
+                    .Select(ps => new PlayerSeasonSummaryDto
+                    {
+                        Ovr = ps.Ovr,
+                        SeasonCode = ps.Season.Code,
+                        Pos1 = ps.Pos1,
+                        TeamName = ps.TeamName,
+                        NationName = ps.NationName,
+                        PriceKr = ps.PriceKr
+                    })
+                    .FirstOrDefault()
             })
             .ToListAsync(cancellationToken);
 
@@ -82,14 +119,14 @@ public class PlayerService : IPlayerService
                 SourceId = p.SourceId,
                 Name = p.Name,
                 NameShort = p.NameShort,
-                ImageUrl = $"https://en.fifaaddict.com/fo4db/pid{p.SourceId}.png",
+                ImageUrl = $"https://s1.fifaaddict.com/fo4/players/{p.SourceId}.png",
                 Seasons = p.PlayerSeasons
                     .OrderByDescending(ps => ps.Ovr)
                     .Select(ps => new PlayerSeasonListItemDto
                     {
                         Id = ps.Id,
                         SourceId = ps.SourceId,
-                        ImageUrl = $"https://en.fifaaddict.com/fo4db/pid{ps.SourceId}.png",
+                        ImageUrl = $"https://s1.fifaaddict.com/fo4/players/{ps.SourceId}.png",
                         PlayerId = p.Id,
                         PlayerName = p.Name,
                         SeasonId = ps.Season.Id,
@@ -126,7 +163,7 @@ public class PlayerService : IPlayerService
             {
                 Id = ps.Id,
                 SourceId = ps.SourceId,
-                ImageUrl = $"https://en.fifaaddict.com/fo4db/pid{ps.SourceId}.png",
+                ImageUrl = $"https://s1.fifaaddict.com/fo4/players/{ps.SourceId}.png",
                 PlayerId = ps.PlayerId,
                 PlayerName = ps.Player.Name,
                 PlayerNameShort = ps.Player.NameShort,
@@ -177,7 +214,10 @@ public class PlayerService : IPlayerService
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var search = $"%{request.Search}%";
-            query = query.Where(ps => EF.Functions.ILike(ps.Player.Name, search) || EF.Functions.ILike(ps.Player.NameShort, search));
+            if (_dbContext.Database.IsNpgsql())
+                query = query.Where(ps => EF.Functions.ILike(ps.Player.Name, search) || EF.Functions.ILike(ps.Player.NameShort, search));
+            else
+                query = query.Where(ps => EF.Functions.Like(ps.Player.Name, search) || EF.Functions.Like(ps.Player.NameShort, search));
         }
 
         if (request.SeasonId.HasValue)
@@ -229,7 +269,7 @@ public class PlayerService : IPlayerService
             {
                 Id = ps.Id,
                 SourceId = ps.SourceId,
-                ImageUrl = $"https://en.fifaaddict.com/fo4db/pid{ps.SourceId}.png",
+                ImageUrl = $"https://s1.fifaaddict.com/fo4/players/{ps.SourceId}.png",
                 PlayerId = ps.PlayerId,
                 PlayerName = ps.Player.Name,
                 SeasonId = ps.SeasonId,
