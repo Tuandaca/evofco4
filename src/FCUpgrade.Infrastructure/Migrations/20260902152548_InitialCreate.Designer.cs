@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FCUpgrade.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260810005239_Milestone2_Indexes")]
-    partial class Milestone2_Indexes
+    [Migration("20260902152548_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,72 @@ namespace FCUpgrade.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("FCUpgrade.Domain.Entities.BaitSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ActualDroppedToLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<bool?>("ActualSuccess")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("BaitHistoryJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ConsecutiveFails")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("FeedbackAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<double>("PredictedProbability")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("PredictedRiskLevel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SuccessCount")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("TargetBars")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("TargetFromLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalBaitCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalLevelsDropped")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActualSuccess");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("TargetFromLevel");
+
+                    b.ToTable("BaitSessions");
+                });
 
             modelBuilder.Entity("FCUpgrade.Domain.Entities.ImportJob", b =>
                 {
@@ -261,8 +327,7 @@ namespace FCUpgrade.Infrastructure.Migrations
 
                     b.HasIndex("TeamId");
 
-                    b.HasIndex("PlayerId", "SeasonId")
-                        .IsUnique();
+                    b.HasIndex("PlayerId", "SeasonId");
 
                     b.ToTable("PlayerSeasons");
                 });

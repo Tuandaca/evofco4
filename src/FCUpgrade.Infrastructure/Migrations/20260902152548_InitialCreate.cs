@@ -7,11 +7,38 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FCUpgrade.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Milestone2_Indexes : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BaitSessions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TargetFromLevel = table.Column<int>(type: "integer", nullable: false),
+                    TargetBars = table.Column<double>(type: "double precision", nullable: false),
+                    BaitHistoryJson = table.Column<string>(type: "text", nullable: false),
+                    TotalBaitCount = table.Column<int>(type: "integer", nullable: false),
+                    SuccessCount = table.Column<int>(type: "integer", nullable: false),
+                    FailCount = table.Column<int>(type: "integer", nullable: false),
+                    ConsecutiveFails = table.Column<int>(type: "integer", nullable: false),
+                    TotalLevelsDropped = table.Column<int>(type: "integer", nullable: false),
+                    PredictedProbability = table.Column<double>(type: "double precision", nullable: false),
+                    PredictedRiskLevel = table.Column<string>(type: "text", nullable: false),
+                    ActualSuccess = table.Column<bool>(type: "boolean", nullable: true),
+                    ActualDroppedToLevel = table.Column<int>(type: "integer", nullable: true),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    FeedbackAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BaitSessions", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "ImportJobs",
                 columns: table => new
@@ -133,6 +160,21 @@ namespace FCUpgrade.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_BaitSessions_ActualSuccess",
+                table: "BaitSessions",
+                column: "ActualSuccess");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaitSessions_CreatedAt",
+                table: "BaitSessions",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BaitSessions_TargetFromLevel",
+                table: "BaitSessions",
+                column: "TargetFromLevel");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Players_Name",
                 table: "Players",
                 column: "Name");
@@ -161,8 +203,7 @@ namespace FCUpgrade.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerSeasons_PlayerId_SeasonId",
                 table: "PlayerSeasons",
-                columns: new[] { "PlayerId", "SeasonId" },
-                unique: true);
+                columns: new[] { "PlayerId", "SeasonId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerSeasons_Pos1",
@@ -200,6 +241,9 @@ namespace FCUpgrade.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BaitSessions");
+
             migrationBuilder.DropTable(
                 name: "ImportJobs");
 
