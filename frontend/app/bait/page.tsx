@@ -392,7 +392,7 @@ export default function BaitAnalysisPage() {
     try {
       const res = await baitApi.saveFeedback({
         targetFromLevel,
-        targetBars,
+        targetBars: debouncedTargetBars,
         baitHistory: history,
         predictedProbability: r.probabilityScore,
         predictedRiskLevel: r.riskLevel,
@@ -405,7 +405,7 @@ export default function BaitAnalysisPage() {
         id: res.sessionId,
         date: new Date().toISOString(),
         targetFromLevel,
-        targetBars,
+        targetBars: debouncedTargetBars,
         success: successVal,
         droppedToLevel: successVal === false ? feedbackDrop : undefined,
       };
@@ -419,7 +419,7 @@ export default function BaitAnalysisPage() {
     } finally {
       setFeedbackSending(false);
     }
-  }, [targetFromLevel, targetBars, history, feedbackDrop, feedbackNotes]);
+  }, [targetFromLevel, debouncedTargetBars, history, feedbackDrop, feedbackNotes]);
 
   // Real-time auto-analysis whenever history or target changes
   useEffect(() => {
