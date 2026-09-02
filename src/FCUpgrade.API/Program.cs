@@ -1,5 +1,7 @@
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading;
+using Scalar.AspNetCore;
 using FCUpgrade.Infrastructure.Persistence;
 using FCUpgrade.Infrastructure.Providers.FIFAAddict;
 using Microsoft.AspNetCore.Builder;
@@ -10,7 +12,14 @@ using Microsoft.Extensions.Hosting;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize enums as strings (e.g. "High" not 3)
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // Camel case (default)
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<FCUpgrade.API.Middleware.GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -40,6 +49,7 @@ builder.Services.AddScoped<FCUpgrade.Application.Services.IPlayerService, FCUpgr
 builder.Services.AddScoped<FCUpgrade.Application.Services.ISeasonService, FCUpgrade.Infrastructure.Services.SeasonService>();
 builder.Services.AddScoped<FCUpgrade.Application.Services.IFilterService, FCUpgrade.Infrastructure.Services.FilterService>();
 builder.Services.AddScoped<FCUpgrade.Application.Services.ISystemService, FCUpgrade.Infrastructure.Services.SystemService>();
+builder.Services.AddScoped<FCUpgrade.Application.Services.IBaitAnalysisService, FCUpgrade.Infrastructure.Services.BaitAnalysisService>();
 
 var app = builder.Build();
 
@@ -70,6 +80,7 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();

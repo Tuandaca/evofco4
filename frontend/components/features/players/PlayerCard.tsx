@@ -28,7 +28,7 @@ export function PlayerCard({ player, viewMode = "grid" }: PlayerCardProps) {
   if (viewMode === "compact") {
     return (
       <Link
-        href={`/players/${player.playerId}`}
+        href={`/players/${player.id}`}
         className="group relative flex items-center gap-4 p-3 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:bg-[var(--card-hover)] hover:border-[var(--primary)]/30 transition-all duration-200"
       >
         {/* Compact OVR Badge */}

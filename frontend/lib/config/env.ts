@@ -17,10 +17,15 @@ function getEnv(key: string, fallback?: string): string {
 export const config = {
   api: {
     /**
-     * Base URL of the .NET backend API.
-     * Used on both server and client — safe because it points to our own API, not a secret.
+     * Base URL for API calls.
+     * - Server-side (SSR/RSC): uses full backend URL (NEXT_PUBLIC_API_BASE_URL) for direct connection.
+     * - Client-side (browser): uses empty string so requests go through Next.js proxy (/api/v1/*).
+     *   This avoids port dependency and CORS issues entirely.
      */
-    baseUrl: getEnv("NEXT_PUBLIC_API_BASE_URL", "http://localhost:5000"),
+    baseUrl:
+      typeof window === "undefined"
+        ? getEnv("NEXT_PUBLIC_API_BASE_URL", "http://localhost:5162")
+        : "",
   },
 
   app: {

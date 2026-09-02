@@ -134,7 +134,7 @@ export interface PlayersQueryParams {
   position?: string;
   minOvr?: number;
   maxOvr?: number;
-  sortBy?: "name" | "updatedAt" | "ovr";
+  sortBy?: "ovr" | "name" | "price" | "height" | "age" | "updatedAt";
   sortDirection?: "asc" | "desc";
 }
 

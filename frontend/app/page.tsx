@@ -148,14 +148,14 @@ async function DataStatusWidget() {
         <span className="flex items-center gap-1">
           <Users size={12} className="text-[var(--primary)]" />
           <strong className="text-[var(--foreground)]">
-            {status.playerCount.toLocaleString("vi-VN")}
+            {(status.playerCount ?? 0).toLocaleString("vi-VN")}
           </strong>{" "}
           cầu thủ
         </span>
         <span className="flex items-center gap-1">
           <Calendar size={12} className="text-[var(--primary)]" />
           <strong className="text-[var(--foreground)]">
-            {status.seasonCount.toLocaleString("vi-VN")}
+            {(status.seasonCount ?? 0).toLocaleString("vi-VN")}
           </strong>{" "}
           season
         </span>

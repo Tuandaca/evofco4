@@ -103,7 +103,6 @@ async function PlayersContent(props: PlayersContentProps) {
   }
 
   const positions = positionsRes.data || [];
-  // @ts-expect-error - seasons data structure
   const seasons = seasonsRes.data?.items || [];
   const { items, totalItems, totalPages, page: currentPage } = playersRes.data;
   const hasNextPage = currentPage < totalPages;

@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Season> Seasons => Set<Season>();
     public DbSet<PlayerSeason> PlayerSeasons => Set<PlayerSeason>();
     public DbSet<ImportJob> ImportJobs => Set<ImportJob>();
+    public DbSet<BaitSession> BaitSessions => Set<BaitSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +60,14 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<ImportJob>(entity =>
         {
             entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<BaitSession>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.TargetFromLevel);
+            entity.HasIndex(e => e.ActualSuccess);
         });
     }
 }
