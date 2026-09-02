@@ -321,7 +321,11 @@ export default function BaitAnalysisPage() {
   const [debouncedTargetBars, setDebouncedTargetBars] = useState<number>(5.0);
   const [history, setHistory] = useState<BaitEntry[]>([]);
   const [result, setResult] = useState<BaitAnalysisResponse | null>(null);
+  // lastResult giữ kết quả cuối cùng hợp lệ — dùng cho feedback khi mồi nổ
+  // vì addEntry reset result=null nhưng feedback cần dữ liệu cũ để gửi lên server
+  const lastResultRef = useRef<BaitAnalysisResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
 
@@ -351,16 +355,23 @@ export default function BaitAnalysisPage() {
   const [feedbackNotes, setFeedbackNotes] = useState("");
   const [feedbackSending, setFeedbackSending] = useState(false);
   const [feedbackResult, setFeedbackResult] = useState<BaitFeedbackResponse | null>(null);
-  const [autoSubmitBroken, setAutoSubmitBroken] = useState(false);
+  // pendingBrokenEntry giữ entry mồi nổ để auto-submit sau khi analyze xong
+  const pendingBrokenRef = useRef<boolean>(false);
 
   const addEntry = (entry: BaitEntry) => {
     const isSuccess = entry.droppedToLevel >= entry.fromLevel + 1;
-    setHistory([...history, entry]);
-    setResult(null);
+    const newHistory = [...history, entry];
+    setHistory(newHistory);
     setFeedbackResult(null);
-    setFeedbackSuccess(isSuccess ? 'broken' : null);
+    setAnalyzeError(null);
     if (isSuccess) {
-      setAutoSubmitBroken(true);
+      // Mồi nổ: đánh dấu pending, KHÔNG reset result ngay
+      // Auto-submit sẽ xảy ra sau khi analyze xong với history mới
+      pendingBrokenRef.current = true;
+      setFeedbackSuccess('broken');
+    } else {
+      setFeedbackSuccess(null);
+      setResult(null);
     }
   };
 
@@ -368,13 +379,14 @@ export default function BaitAnalysisPage() {
     setHistory(history.filter((_, idx) => idx !== i));
     setFeedbackResult(null);
     setFeedbackSuccess(null);
+    pendingBrokenRef.current = false;
   };
 
   // Real-time auto-analysis whenever history or target changes
   useEffect(() => {
     if (history.length === 0) {
       setResult(null);
-      // Removed setLoading(false) to prevent flash
+      setAnalyzeError(null);
       return;
     }
 
@@ -382,16 +394,29 @@ export default function BaitAnalysisPage() {
     
     const analyze = async () => {
       setLoading(true);
+      setAnalyzeError(null);
       try {
-        const res = await baitApi.analyzeSequence({ targetFromLevel, targetBars: debouncedTargetBars, baitHistory: history });
+        // Timeout 30s để tránh miss khi Render cold start
+        const res = await baitApi.analyzeSequence(
+          { targetFromLevel, targetBars: debouncedTargetBars, baitHistory: history },
+          { timeoutMs: 30_000 }
+        );
         if (abortController.signal.aborted) return;
         setResult(res);
-        // Only reset feedback if we haven't submitted it yet, or if it changes
+        lastResultRef.current = res;
         if (!feedbackResult) {
           setFeedbackDrop(targetFromLevel - 1);
         }
+        // Nếu đang pending broken (mồi nổ), auto-submit feedback ngay sau khi có result
+        if (pendingBrokenRef.current) {
+          pendingBrokenRef.current = false;
+          // Dùng setTimeout để đảm bảo state đã update trước khi gọi
+          setTimeout(() => handleFeedbackWithResult(res, 'broken'), 0);
+        }
       } catch (e) {
-        console.error(e);
+        if (abortController.signal.aborted) return;
+        console.error('[BaitAnalysis] analyze failed:', e);
+        setAnalyzeError('Không thể kết nối server. Vui lòng thử lại.');
       } finally {
         if (!abortController.signal.aborted) {
           setLoading(false);
@@ -403,59 +428,60 @@ export default function BaitAnalysisPage() {
     return () => abortController.abort();
   }, [history, targetFromLevel, debouncedTargetBars]);
 
-  const handleFeedback = async () => {
-    if (!result || feedbackSuccess === null) return;
+  // handleFeedbackWithResult: nhận result trực tiếp, không phụ thuộc vào state
+  // Dùng cho auto-submit khi mồi nổ để tránh race condition
+  const handleFeedbackWithResult = async (
+    r: BaitAnalysisResponse,
+    successVal: boolean | 'broken'
+  ) => {
     setFeedbackSending(true);
     try {
       const res = await baitApi.saveFeedback({
         targetFromLevel,
         targetBars,
         baitHistory: history,
-        predictedProbability: result.probabilityScore,
-        predictedRiskLevel: result.riskLevel,
-        actualSuccess: feedbackSuccess === 'broken' ? null : feedbackSuccess,
-        actualDroppedToLevel: feedbackSuccess === false ? feedbackDrop : undefined,
+        predictedProbability: r.probabilityScore,
+        predictedRiskLevel: r.riskLevel,
+        actualSuccess: successVal === 'broken' ? null : successVal,
+        actualDroppedToLevel: successVal === false ? feedbackDrop : undefined,
         notes: feedbackNotes
       });
       setFeedbackResult(res);
-
-      // Save to local recent history
       const newSession: RecentSession = {
         id: res.sessionId,
         date: new Date().toISOString(),
         targetFromLevel,
         targetBars,
-        success: feedbackSuccess,
-        droppedToLevel: feedbackSuccess === false ? feedbackDrop : undefined,
+        success: successVal,
+        droppedToLevel: successVal === false ? feedbackDrop : undefined,
       };
-      const updated = [newSession, ...recentSessions].slice(0, 5); // Keep last 5
+      const updated = [newSession, ...recentSessions].slice(0, 5);
       setRecentSessions(updated);
       localStorage.setItem('recentBaitSessions', JSON.stringify(updated));
-
     } catch (e) {
-      console.error(e);
+      console.error('[BaitAnalysis] saveFeedback failed:', e);
     } finally {
       setFeedbackSending(false);
     }
   };
 
+  const handleFeedback = async () => {
+    const r = result ?? lastResultRef.current;
+    if (!r || feedbackSuccess === null) return;
+    await handleFeedbackWithResult(r, feedbackSuccess);
+  };
+
   const handleRestart = () => {
     setHistory([]);
     setResult(null);
+    lastResultRef.current = null;
     setFeedbackSuccess(null);
     setFeedbackDrop(targetFromLevel - 1);
     setFeedbackNotes("");
     setFeedbackResult(null);
-    setAutoSubmitBroken(false);
+    setAnalyzeError(null);
+    pendingBrokenRef.current = false;
   };
-
-  // Auto-submit effect
-  useEffect(() => {
-    if (autoSubmitBroken && result && feedbackSuccess === 'broken' && !feedbackSending) {
-      setAutoSubmitBroken(false);
-      handleFeedback();
-    }
-  }, [autoSubmitBroken, result, feedbackSuccess, feedbackSending]); // Only triggers when result becomes available
 
   const pct = result ? Math.round(result.probabilityScore * 100) : 0;
   const animatedPct = useAnimatedNumber(pct, 800);
@@ -581,8 +607,23 @@ export default function BaitAnalysisPage() {
           <div className="lg:col-span-5 space-y-6">
             {/* Main Result Box */}
             <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-6 min-h-[400px] relative shadow-lg">
+              {/* Loading state */}
+              {loading && !result && (
+                <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center gap-4">
+                  <div className="w-12 h-12 rounded-full border-4 border-zinc-700 border-t-blue-500 animate-spin" />
+                  <p className="text-sm text-zinc-400">Đang phân tích chuỗi mồi...</p>
+                </div>
+              )}
+              {/* Error state */}
+              {analyzeError && !loading && !result && (
+                <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center gap-4">
+                  <div className="text-4xl">⚠️</div>
+                  <p className="text-sm text-red-400">{analyzeError}</p>
+                  <p className="text-xs text-zinc-600">Nếu lỗi tiếp tục, hãy thử xóa và nhập lại lần đập mồi.</p>
+                </div>
+              )}
               {/* Empty state */}
-              {!result && (
+              {!result && !loading && !analyzeError && (
               <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-center gap-4 text-zinc-600">
                 <div className="text-6xl opacity-20">⚡</div>
                 <p className="text-sm">

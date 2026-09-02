@@ -51,8 +51,11 @@ export interface BaitFeedbackResponse {
 }
 
 export const baitApi = {
-  analyzeSequence: (request: BaitAnalysisRequest): Promise<BaitAnalysisResponse> =>
-    apiClient.post<BaitAnalysisResponse>("/api/v1/bait/analyze", request),
+  analyzeSequence: (
+    request: BaitAnalysisRequest,
+    options?: { timeoutMs?: number }
+  ): Promise<BaitAnalysisResponse> =>
+    apiClient.post<BaitAnalysisResponse>("/api/v1/bait/analyze", request, options),
 
   saveFeedback: (request: BaitFeedbackRequest): Promise<BaitFeedbackResponse> =>
     apiClient.post<BaitFeedbackResponse>("/api/v1/bait/feedback", request),
