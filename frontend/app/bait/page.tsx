@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   baitApi,
   BaitAnalysisResponse,
@@ -382,55 +382,9 @@ export default function BaitAnalysisPage() {
     pendingBrokenRef.current = false;
   };
 
-  // Real-time auto-analysis whenever history or target changes
-  useEffect(() => {
-    if (history.length === 0) {
-      setResult(null);
-      setAnalyzeError(null);
-      return;
-    }
-
-    const abortController = new AbortController();
-    
-    const analyze = async () => {
-      setLoading(true);
-      setAnalyzeError(null);
-      try {
-        // Timeout 30s để tránh miss khi Render cold start
-        const res = await baitApi.analyzeSequence(
-          { targetFromLevel, targetBars: debouncedTargetBars, baitHistory: history },
-          { timeoutMs: 30_000 }
-        );
-        if (abortController.signal.aborted) return;
-        setResult(res);
-        lastResultRef.current = res;
-        if (!feedbackResult) {
-          setFeedbackDrop(targetFromLevel - 1);
-        }
-        // Nếu đang pending broken (mồi nổ), auto-submit feedback ngay sau khi có result
-        if (pendingBrokenRef.current) {
-          pendingBrokenRef.current = false;
-          // Dùng setTimeout để đảm bảo state đã update trước khi gọi
-          setTimeout(() => handleFeedbackWithResult(res, 'broken'), 0);
-        }
-      } catch (e) {
-        if (abortController.signal.aborted) return;
-        console.error('[BaitAnalysis] analyze failed:', e);
-        setAnalyzeError('Không thể kết nối server. Vui lòng thử lại.');
-      } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    analyze();
-    return () => abortController.abort();
-  }, [history, targetFromLevel, debouncedTargetBars]);
-
   // handleFeedbackWithResult: nhận result trực tiếp, không phụ thuộc vào state
-  // Dùng cho auto-submit khi mồi nổ để tránh race condition
-  const handleFeedbackWithResult = async (
+  // Khai báo TRƯỚC useEffect để tránh "use before declaration" làm crash trang
+  const handleFeedbackWithResult = useCallback(async (
     r: BaitAnalysisResponse,
     successVal: boolean | 'broken'
   ) => {
@@ -455,15 +409,60 @@ export default function BaitAnalysisPage() {
         success: successVal,
         droppedToLevel: successVal === false ? feedbackDrop : undefined,
       };
-      const updated = [newSession, ...recentSessions].slice(0, 5);
-      setRecentSessions(updated);
-      localStorage.setItem('recentBaitSessions', JSON.stringify(updated));
+      setRecentSessions(prev => {
+        const updated = [newSession, ...prev].slice(0, 5);
+        localStorage.setItem('recentBaitSessions', JSON.stringify(updated));
+        return updated;
+      });
     } catch (e) {
       console.error('[BaitAnalysis] saveFeedback failed:', e);
     } finally {
       setFeedbackSending(false);
     }
-  };
+  }, [targetFromLevel, targetBars, history, feedbackDrop, feedbackNotes]);
+
+  // Real-time auto-analysis whenever history or target changes
+  useEffect(() => {
+    if (history.length === 0) {
+      setResult(null);
+      setAnalyzeError(null);
+      return;
+    }
+
+    const abortController = new AbortController();
+    
+    const analyze = async () => {
+      setLoading(true);
+      setAnalyzeError(null);
+      try {
+        // Timeout 30s để tránh miss khi Render cold start
+        const res = await baitApi.analyzeSequence(
+          { targetFromLevel, targetBars: debouncedTargetBars, baitHistory: history },
+          { timeoutMs: 30_000 }
+        );
+        if (abortController.signal.aborted) return;
+        setResult(res);
+        lastResultRef.current = res;
+        setFeedbackDrop(prev => prev); // giữ nguyên feedbackDrop nếu đã có feedback
+        // Nếu đang pending broken (mồi nổ), auto-submit feedback ngay sau khi có result
+        if (pendingBrokenRef.current) {
+          pendingBrokenRef.current = false;
+          setTimeout(() => handleFeedbackWithResult(res, 'broken'), 0);
+        }
+      } catch (e) {
+        if (abortController.signal.aborted) return;
+        console.error('[BaitAnalysis] analyze failed:', e);
+        setAnalyzeError('Không thể kết nối server. Vui lòng thử lại.');
+      } finally {
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    analyze();
+    return () => abortController.abort();
+  }, [history, targetFromLevel, debouncedTargetBars, handleFeedbackWithResult]);
 
   const handleFeedback = async () => {
     const r = result ?? lastResultRef.current;
