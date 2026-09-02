@@ -99,3 +99,6 @@ src/FCUpgrade.API/nuxt.js
 # DO NOT add .agent to gitignore unless you
 # specifically don't want to share AI config.
 # ===================================
+
+# Ignore any env files
+.env.*
